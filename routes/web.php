@@ -14,15 +14,7 @@ use App\Models\kategori;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('/kategori.index'); // Ganti dengan view yang sesuai
 });
 
-Route::resource('kategori', KategoriController::class);
-Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminController::class, 'login']);
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-Route::resource('admin/products', ProdukController::class);
-Route::resource('admin/transactions', TransaksiController::class);
-Route::resource('admin/notifications', NotifikasiController::class);
-Route::resource('admin/users', UserController::class);
-Route::get('admin/income', [IncomeController::class, 'index'])->name('admin.income');
+Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');

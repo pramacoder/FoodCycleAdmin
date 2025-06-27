@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('isi'); // Field to store the content of the notification
             $table->boolean('is_read')->default(false); // Field to indicate if the notification
             $table->timestamp('dibaca_pada')->nullable(); // Field to store the timestamp
+            $table->string('target')->default('all'); // Field to indicate the target of the notification, e.g., 'all', 'user', 'admin'
             $table->timestamps();
         });
     }

@@ -21,7 +21,8 @@ return new class extends Migration
             $table->decimal('total_harga', 10, 2);
             $table->string('status')->default('pending'); // 'pending', 'completed', 'cancelled'
             $table->timestamp('tanggal_transaksi')->useCurrent();
-            $table->timestamps();
+            $table->integer('pajak')->default('5%');
+            $table->timestamps(); 
         });
     }
 

@@ -6,5 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class admin extends Model
 {
-    //
+    protected $table = 'admin'; // Nama tabel di database
+    protected $fillable = ['name', 'email', 'password']; // Kolom yang dapat diisi massal
+
+    // Relasi dengan model chat
+    public function chat()
+    {
+        return $this->hasMany('App\Models\chat', 'chat_id');
+    }
+    // Relasi dengan model transaksi (jika ada)
+    public function transaksi()
+    {
+        return $this->hasMany('App\Models\transaksi', 'transaksi_id');
+    }
 }
