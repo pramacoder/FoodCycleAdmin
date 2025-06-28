@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Firebase;
+use Kreait\Firebase\Factory;
+
 
 class KategoriController extends Controller
 {
@@ -12,8 +15,17 @@ class KategoriController extends Controller
      */
     public function index()
     {
-        $allkategoris = Kategori::all();
-        return view('kategori.index', ['allkategoris' => $allkategoris]);
+        $factory = (new Factory)->withServiceAccount(base_path('storage/app/foodwaste-60618-firebase-adminsdk-fbsvc-95457603dd.json'));
+        $firestore = $factory->createFirestore();
+        $database = $firestore->database();
+        $kategoris = $database->collection('kategori')->documents();
+
+        $allkategoris = [];
+        foreach ($kategoris as $kategori) {
+            $allkategoris[] = $kategori->data(); // Menyimpan data kategori
+        }
+
+        return view('kategori.index', compact('allkategoris')); // Mengirim data ke view
     }
 
     /**

@@ -122,14 +122,10 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-    'providers' => [
-    // Other providers...
-        Kreait\Laravel\Firebase\ServiceProvider::class,
-    ],
-    'aliases' => [
-    // Other aliases...
-        'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
-    ],
     // Add other service providers here as needed],
+    'providers' => [
+        // Add your Firebase service provider here
+        App\Providers\AppServiceProvider::class,
+    ],
 ];
  

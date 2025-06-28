@@ -14,7 +14,9 @@ use App\Models\kategori;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('/kategori.index'); // Ganti dengan view yang sesuai
+    return view('/welcome'); // Ganti dengan view yang sesuai
 });
 
-Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
