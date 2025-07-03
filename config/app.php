@@ -1,5 +1,6 @@
 <?php
 
+
 return [
 
     /*
@@ -123,9 +124,4 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
     // Add other service providers here as needed],
-    'providers' => [
-        // Add your Firebase service provider here
-        App\Providers\AppServiceProvider::class,
-    ],
 ];
- 

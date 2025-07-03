@@ -2,7 +2,7 @@
 
 @section('content')
   <div class="dashboard">
-    @include('admin.sidebar')
+    @include('components.sidebar')
     <div class="dashboard-content">
       <h2>Welcome to Admin Dashboard</h2>
       <div class="stats">

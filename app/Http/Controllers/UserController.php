@@ -34,9 +34,10 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(user $user)
+        public function show(User $user)
     {
-        //
+        // Exclude password and sensitive data
+        return response()->json($user->except('password'));
     }
 
     /**

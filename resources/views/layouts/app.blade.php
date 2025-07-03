@@ -14,7 +14,7 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @vite('resources/css/app.css')
 </head>
 <body>
     <div id="app">
@@ -71,10 +71,25 @@
                 </div>
             </div>
         </nav>
+        <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white p-5">
+            <h2 class="text-2xl font-semibold mb-6">FoodCycle Admin</h2>
+            <ul>
+                <li><a href="{{ route('categories.index') }}" class="block py-2 hover:bg-gray-700">Kategori</a></li>
+                <li><a href="{{ route('notifications.index') }}" class="block py-2 hover:bg-gray-700">Notifikasi</a></li>
+                <li><a href="{{ route('transactions.index') }}" class="block py-2 hover:bg-gray-700">Transaksi</a></li>
+                <li><a href="{{ route('users.index') }}" class="block py-2 hover:bg-gray-700">Pengguna</a></li>
+            </ul>
+        </div>
 
-        <main class="py-4">
-            @yield('content')
-        </main>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                @yield('content')
+            </div>
+        </div>
+    </div>
     </div>
 </body>
 </html>

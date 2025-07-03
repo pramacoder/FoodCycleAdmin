@@ -4,62 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Models\notifikasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class NotifikasiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'judul' => 'required',
+            'isi' => 'required',
+        ]);
+
+        $notification = Notifikasi::create($request->all());
+
+        // Send Firebase notification
+        $this->sendNotificationToFirebase($request->judul, $request->isi);
+
+        return response()->json($notification, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(notifikasi $notifikasi)
+    // Send notification to Firebase
+    private function sendNotificationToFirebase($title, $message)
     {
-        //
-    }
+        $firebaseApiUrl = 'https://fcm.googleapis.com/fcm/send';
+        $serverKey = 'YOUR_FIREBASE_SERVER_KEY';
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(notifikasi $notifikasi)
-    {
-        //
-    }
+        $data = [
+            'to' => '/topics/all', // Send to all users or a specific topic
+            'notification' => [
+                'title' => $title,
+                'body' => $message,
+            ],
+        ];
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, notifikasi $notifikasi)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(notifikasi $notifikasi)
-    {
-        //
+        Http::withHeaders([
+            'Authorization' => 'key=' . $serverKey,
+            'Content-Type' => 'application/json',
+        ])->post($firebaseApiUrl, $data);
     }
 }

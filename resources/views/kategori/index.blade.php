@@ -1,46 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Kategori</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <script src="{{ asset('js/app.js') }}" defer></script>
-</head>
-<body>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Kategori</h1>
-        <div class="mb-4">
-            <a href="{{ route('kategori.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Tambah Kategori</a>
-        </div>
-        <table class="min-w-full bg-white border border-gray-200">
-            <thead>
-                <tr>
-                    <th class="border px-4 py-2">ID</th>
-                    <th class="border px-4 py-2">Nama Kategori</th>
-                    <th class="border px-4 py-2">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($allkategoris as $key => $kategori)
-                    <tr>
-                        <td class="border px-4 py-2">{{ $kategori->id }}</td>
-                        <td class="border px-4 py-2">{{ $kategori->nama_kategori }}</td>
-                        <td class="border px-4 py-2">
-                            <a href="{{ route('kategori.edit', $kategori->id) }}" class="text-blue-500 hover:underline">Edit</a>
-                            <form action="{{ route('kategori.destroy', $kategori->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:underline ml-2">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+@extends('layout.apps')
 
-    </div>
-</body>
-</html>
+@section('content')
+<h2 class="text-2xl font-semibold mb-4">Kategori</h2>
+
+<div class="mb-4">
+    <a href="{{ route('categories.create') }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Tambah Kategori</a>
+</div>
+
+<table class="min-w-full table-auto">
+    <thead>
+        <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left">ID</th>
+            <th class="px-4 py-2 text-left">Nama Kategori</th>
+            <th class="px-4 py-2 text-left">Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($categories as $category)
+        <tr>
+            <td class="border px-4 py-2">{{ $category->id }}</td>
+            <td class="border px-4 py-2">{{ $category->nama_kategori }}</td>
+            <td class="border px-4 py-2">
+                <a href="{{ route('categories.edit', $category->id) }}" class="text-blue-500 hover:text-blue-700">Edit</a>
+                <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-500 hover:text-red-700">Hapus</button>
+                </form>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endsection
