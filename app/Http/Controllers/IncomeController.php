@@ -7,59 +7,63 @@ use Illuminate\Http\Request;
 
 class IncomeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Tampilkan semua data income
     public function index()
     {
-        //
+        $incomes = Income::all();
+        return response()->json($incomes);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Tampilkan form create (opsional, biasanya untuk web)
     public function create()
     {
-        //
+        // Jika menggunakan API, biasanya tidak perlu
+        return response()->json(['message' => 'Show create form']);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Simpan data income baru
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'amount' => 'required|numeric',
+            'description' => 'required|string',
+            // tambahkan validasi lain sesuai kebutuhan
+        ]);
+
+        $income = Income::create($validated);
+        return response()->json($income, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Tampilkan detail income tertentu
     public function show(Income $income)
     {
-        //
+        return response()->json($income);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Tampilkan form edit (opsional, biasanya untuk web)
     public function edit(Income $income)
     {
-        //
+        // Jika menggunakan API, biasanya tidak perlu
+        return response()->json($income);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // Update data income
     public function update(Request $request, Income $income)
     {
-        //
+        $validated = $request->validate([
+            'amount' => 'sometimes|required|numeric',
+            'description' => 'sometimes|required|string',
+            // tambahkan validasi lain sesuai kebutuhan
+        ]);
+
+        $income->update($validated);
+        return response()->json($income);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Hapus data income
     public function destroy(Income $income)
     {
-        //
+        $income->delete();
+        return response()->json(['message' => 'Income deleted']);
     }
 }

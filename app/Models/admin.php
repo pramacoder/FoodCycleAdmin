@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class admin extends Model
+class Admin extends Model
 {
-    protected $table = 'admin'; // Nama tabel di database
+    protected $table = 'admins'; // Nama tabel di database
     protected $fillable = ['name', 'email', 'password']; // Kolom yang dapat diisi massal
 
     // Relasi dengan model chat

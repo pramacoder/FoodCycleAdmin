@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class peternak_babi extends Model
+class Peternak_babi extends Model
 {
-    protected $table = 'peternak_babi'; // Nama tabel di database
+    protected $table = 'peternak_babis'; // Nama tabel di database
     protected $fillable = ['nama_peternak', 'alamat', 'telepon']; // Kolom yang dapat diisi massal
 
     // Relasi dengan model Produk (jika ada)

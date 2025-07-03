@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class hotel_restoran extends Model
+class Hotel_restoran extends Model
 {
-    protected $table = 'hotel_restoran'; // Nama tabel di database
+    protected $table = 'hotel_restorans'; // Nama tabel di database
     protected $fillable = ['nama_hotel', 'alamat', 'nomor_telepon', 'email']; // Kolom yang dapat diisi massal
 
     // Relasi dengan model Produk (jika ada)

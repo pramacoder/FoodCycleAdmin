@@ -2,64 +2,115 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\admin;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Transaksi;
+use App\Models\Hotel_restoran;
+use App\Models\Produk;
 
 class AdminController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Show admin dashboard
      */
-    public function index()
+    public function dashboard()
     {
-        //
+        try {
+            $data = [
+                'total_users' => User::count(),
+                'total_transaksi' => Transaksi::count(),
+                'total_hotel_restoran' => Hotel_restoran::count(),
+                'total_produk' => Produk::count(),
+                'recent_transaksi' => Transaksi::with(['user', 'hotel_restoran', 'produk'])
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get(),
+                'monthly_revenue' => Transaksi::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('total_harga'),
+            ];
+
+            return view('admin.dashboard', $data);
+        } catch (\Exception $e) {
+            return view('admin.dashboard', [
+                'total_users' => 0,
+                'total_transaksi' => 0,
+                'total_hotel_restoran' => 0,
+                'total_produk' => 0,
+                'recent_transaksi' => collect(),
+                'monthly_revenue' => 0,
+            ]);
+        }
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show reports
      */
-    public function create()
+    public function reports()
     {
-        //
+        return view('admin.reports.index');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Show transaction report
      */
-    public function store(Request $request)
+    public function transactionReport()
     {
-        //
+        $transaksi = Transaksi::with(['user', 'hotel_restoran', 'produk'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.reports.transactions', compact('transaksi'));
     }
 
     /**
-     * Display the specified resource.
+     * Show user report
      */
-    public function show(admin $admin)
+    public function userReport()
     {
-        //
+        $users = User::orderBy('created_at', 'desc')->paginate(20);
+
+        return view('admin.reports.users', compact('users'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show revenue report
      */
-    public function edit(admin $admin)
+    public function revenueReport()
     {
-        //
+        $revenue_data = Transaksi::selectRaw('
+                DATE(created_at) as date,
+                SUM(total_harga) as total_revenue,
+                COUNT(*) as transaction_count
+            ')
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->limit(30)
+            ->get();
+
+        return view('admin.reports.revenue', compact('revenue_data'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Show settings
      */
-    public function update(Request $request, admin $admin)
+    public function settings()
     {
-        //
+        return view('admin.settings.index');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Update settings
      */
-    public function destroy(admin $admin)
+    public function updateSettings(Request $request)
     {
-        //
+        $request->validate([
+            'app_name' => 'required|string|max:255',
+            'app_description' => 'nullable|string',
+            'contact_email' => 'required|email',
+        ]);
+
+        // Logic untuk update settings
+        return back()->with('success', 'Pengaturan berhasil diupdate.');
     }
 }

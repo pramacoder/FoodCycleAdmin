@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class produk extends Model
+class Produk extends Model
 {
-    protected $table = 'produk'; // Nama tabel di database
+    protected $table = 'produks'; // Nama tabel di database
     protected $fillable = ['nama_produk', 'harga', 'stok', 'kategori_id']; // Kolom yang dapat diisi massal
 
     // Relasi dengan model Kategori (jika ada)

@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
-class notifikasi extends Model
+class Notifikasi extends Model
 {
-    protected $table = 'notifikasi'; // Nama tabel di database
+    protected $table = 'notifikasis'; // Nama tabel di database
     protected $fillable = ['judul', 'isi', 'status']; // Kolom yang dapat diisi massal
 
     // Relasi dengan model User (jika ada)

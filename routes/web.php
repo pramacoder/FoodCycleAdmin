@@ -1,64 +1,139 @@
 <?php
 
-use App\Http\Controllers\KategoriController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\IncomeController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\NotifikasiController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\IncomeController; // Perbaikan: hapus namespace duplikat
 
-Route::get('/', fn() => view('login'))->name('admin.login'); // Ganti dengan view yang sesuai
-Auth::routes();
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// Kategori Routes
-Route::get('/kategori', [KategoriController::class, 'index'])->name('categories.index');
-Route::post('/kategori', [KategoriController::class, 'store'])->name('categories.store');
-Route::put('/kategori/{kategori}', [KategoriController::class, 'update'])->name('categories.update');
-Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy'])->name('categories.destroy');
-Route::get('/kategori/{kategori}', [KategoriController::class, 'show'])->name('categories.show');
+// Guest routes (redirect to login if authenticated)
+Route::middleware('guest')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('login');
+    });
+    
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+});
 
-// Produk Routes
-Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
-Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
-Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
-Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
-Route::get('/produk/{produk}', [ProdukController::class, 'show'])->name('produk.show');
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Admin routes
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        
+        // Dashboard - Perbaikan: hilangkan duplikat dan typo
+        Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.index');
+        
+        // User Management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::get('/{user}', [UserController::class, 'show'])->name('show');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+            Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+        });
+        
+        // Kategori Management
+        Route::prefix('kategori')->name('kategori.')->group(function () {
+            Route::get('/', [KategoriController::class, 'index'])->name('index');
+            Route::get('/create', [KategoriController::class, 'create'])->name('create');
+            Route::post('/', [KategoriController::class, 'store'])->name('store');
+            Route::get('/{kategori}', [KategoriController::class, 'show'])->name('show');
+            Route::get('/{kategori}/edit', [KategoriController::class, 'edit'])->name('edit');
+            Route::put('/{kategori}', [KategoriController::class, 'update'])->name('update');
+            Route::delete('/{kategori}', [KategoriController::class, 'destroy'])->name('destroy');
+        });
+        
+        // Notifikasi Management
+        Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+            Route::get('/', [NotifikasiController::class, 'index'])->name('index');
+            Route::get('/create', [NotifikasiController::class, 'create'])->name('create');
+            Route::post('/', [NotifikasiController::class, 'store'])->name('store');
+            Route::get('/{notifikasi}', [NotifikasiController::class, 'show'])->name('show');
+            Route::get('/{notifikasi}/edit', [NotifikasiController::class, 'edit'])->name('edit');
+            Route::put('/{notifikasi}', [NotifikasiController::class, 'update'])->name('update');
+            Route::delete('/{notifikasi}', [NotifikasiController::class, 'destroy'])->name('destroy');
+            Route::post('/{notifikasi}/send', [NotifikasiController::class, 'sendNotification'])->name('send');
+            Route::post('/send-broadcast', [NotifikasiController::class, 'sendBroadcast'])->name('send-broadcast');
+        });
+        
+        // Transaksi Management
+        Route::prefix('transaksi')->name('transaksi.')->group(function () {
+            Route::get('/', [TransaksiController::class, 'index'])->name('index');
+            Route::get('/{transaksi}', [TransaksiController::class, 'show'])->name('show');
+            Route::put('/{transaksi}/status', [TransaksiController::class, 'updateStatus'])->name('update-status');
+            Route::get('/export/excel', [TransaksiController::class, 'exportExcel'])->name('export.excel');
+            Route::get('/export/pdf', [TransaksiController::class, 'exportPdf'])->name('export.pdf');
+            Route::get('/filter', [TransaksiController::class, 'filter'])->name('filter');
+        });
+        
+        // Pajak Management - Perbaikan: hapus backslash di depan
+        Route::prefix('pajak')->name('pajak.')->group(function () {
+            Route::get('/', [IncomeController::class, 'index'])->name('index');
+            Route::get('/show', [IncomeController::class, 'show'])->name('show');
+            Route::get('/edit', [IncomeController::class, 'edit'])->name('edit');
+            Route::put('/update', [IncomeController::class, 'update'])->name('update');
+            Route::get('/history', [IncomeController::class, 'history'])->name('history');
+        });
+        
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [AdminController::class, 'reports'])->name('index');
+            Route::get('/transactions', [AdminController::class, 'transactionReport'])->name('transactions');
+            Route::get('/users', [AdminController::class, 'userReport'])->name('users');
+            Route::get('/revenue', [AdminController::class, 'revenueReport'])->name('revenue');
+        });
+        
+        // Settings
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [AdminController::class, 'settings'])->name('index');
+            Route::put('/update', [AdminController::class, 'updateSettings'])->name('update');
+        });
+    });
+    
+    // User routes (non-admin)
+    Route::middleware('user')->prefix('user')->name('user.')->group(function () {
+        Route::get('/dashboard', [UserController::class, 'userDashboard'])->name('dashboard');
+        Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+        Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/notifications', [UserController::class, 'notifications'])->name('notifications');
+        Route::post('/notifications/{id}/read', [UserController::class, 'markAsRead'])->name('notifications.read');
+    });
+});
 
-// Transaksi Routes
-Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transactions.index');
-Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transactions.store');
-Route::put('/transaksi/{transaksi}', [TransaksiController::class, 'update'])->name('transactions.update');
-Route::delete('/transaksi/{transaksi}', [TransaksiController::class, 'destroy'])->name('transactions.destroy');
-Route::post('/transaksi/{transaksi}/pajak', [TransaksiController::class, 'addTax'])->name('transactions.addTax');
-Route::get('/transaksi/{transaksi}', [TransaksiController::class, 'show'])->name('transactions.show');
+// API Routes for Mobile App (if needed)
+Route::prefix('api')->middleware('api')->group(function () {
+    Route::post('/login', [AuthController::class, 'apiLogin']);
+    Route::post('/register', [AuthController::class, 'apiRegister']);
+    
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/user', [AuthController::class, 'apiUser']);
+        Route::post('/logout', [AuthController::class, 'apiLogout']);
+    });
+});
 
-// Notifikasi Routes
-Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifications.index');
-Route::post('/notifikasi', [NotifikasiController::class, 'store'])->name('notifications.store');
-Route::get('/notifikasi/{notifikasi}', [NotifikasiController::class, 'show'])->name('notifications.show');
-
-// User Routes
-Route::get('/user', [UserController::class, 'index'])->name('users.index');
-Route::post('/user', [UserController::class, 'store'])->name('users.store');
-Route::put('/user/{user}', [UserController::class, 'update'])->name('users.update');
-Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-Route::get('/user/{user}', [UserController::class, 'show'])->name('users.show');
-
-// Admin Routes
-Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
-Route::put('/admin/{admin}', [AdminController::class, 'update'])->name('admin.update');
-Route::delete('/admin/{admin}', [AdminController::class, 'destroy'])->name('admin.destroy');
-Route::get('/admin/{admin}', [AdminController::class, 'show'])->name('admin.show');
-
-// Income Routes
-Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
-Route::post('/income', [IncomeController::class, 'store'])->name('income.store');
-Route::put('/income/{income}', [IncomeController::class, 'update'])->name('income.update');
-Route::delete('/income/{income}', [IncomeController::class, 'destroy'])->name('income.destroy');
-Route::get('/income/{income}', [IncomeController::class, 'show'])->name('income.show');
+// Fallback route
+Route::fallback(function () {
+    return redirect()->route('login');
+});
