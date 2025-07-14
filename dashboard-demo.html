@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodCycle Dashboard - Demo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Dashboard Custom Styles */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .dashboard-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .progress-bar {
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chart-bar {
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-hover:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            transform: scale(1.005);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .status-badge {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .status-badge:hover::before {
+            left: 100%;
+        }
+
+        @keyframes card-loading {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-loading {
+            animation: card-loading 0.6s ease forwards;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .float-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Focus styles for accessibility */
+        button:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header Section -->
+    <div class="p-6 bg-white shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold gradient-text">
+                    Dashboard
+                </h1>
+                <p class="text-gray-600 mt-2 text-lg">Selamat datang kembali! Berikut adalah ringkasan aktivitas FoodCycle hari ini.</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Cari..." class="search-input pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="btn-primary text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-download mr-2"></i>Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        <!-- Stats Cards with Animations -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Users Card -->
+            <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-users text-2xl float-icon"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold" id="userCount">1,247</div>
+                        <div class="text-blue-100 text-sm">Total Users</div>
+                    </div>
+                </div>
+                <div class="flex items-center text-blue-100">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span class="text-sm">+12% dari bulan lalu</span>
+                </div>
+                <div class="mt-4 w-full bg-white bg-opacity-20 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full progress-bar" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <!-- Transactions Card -->
+            <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-exchange-alt text-2xl float-icon"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold" id="transactionCount">892</div>
+                        <div class="text-green-100 text-sm">Transaksi</div>
+                    </div>
+                </div>
+                <div class="flex items-center text-green-100">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span class="text-sm">+8% dari bulan lalu</span>
+                </div>
+                <div class="mt-4 w-full bg-white bg-opacity-20 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full progress-bar" style="width: 65%"></div>
+                </div>
+            </div>
+
+            <!-- Categories Card -->
+            <div class="dashboard-card bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-tags text-2xl float-icon"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold" id="categoryCount">15</div>
+                        <div class="text-yellow-100 text-sm">Kategori</div>
+                    </div>
+                </div>
+                <div class="flex items-center text-yellow-100">
+                    <i class="fas fa-minus mr-1"></i>
+                    <span class="text-sm">Stabil</span>
+                </div>
+                <div class="mt-4 w-full bg-white bg-opacity-20 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full progress-bar" style="width: 45%"></div>
+                </div>
+            </div>
+
+            <!-- Notifications Card -->
+            <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300 relative">
+                <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center pulse">
+                    3
+                </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-bell text-2xl float-icon"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold" id="notificationCount">234</div>
+                        <div class="text-purple-100 text-sm">Notifikasi</div>
+                    </div>
+                </div>
+                <div class="flex items-center text-purple-100">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span class="text-sm">+25% dari bulan lalu</span>
+                </div>
+                <div class="mt-4 w-full bg-white bg-opacity-20 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full progress-bar" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Analytics Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Revenue Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Pendapatan Bulanan</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-sm bg-blue-100 text-blue-600 rounded-lg" onclick="updateChartPeriod(this)">7D</button>
+                        <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg" onclick="updateChartPeriod(this)">30D</button>
+                        <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg" onclick="updateChartPeriod(this)">90D</button>
+                    </div>
+                </div>
+                <div class="h-64 flex items-end justify-between space-x-2">
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 60%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 80%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 45%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 90%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 70%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 85%"></div>
+                    <div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg chart-bar" style="height: 55%"></div>
+                </div>
+                <div class="flex justify-between mt-4 text-sm text-gray-500">
+                    <span>Sen</span>
+                    <span>Sel</span>
+                    <span>Rab</span>
+                    <span>Kam</span>
+                    <span>Jum</span>
+                    <span>Sab</span>
+                    <span>Min</span>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Aktivitas Terbaru</h3>
+                <div class="space-y-4" id="activityFeed">
+                    <div class="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-plus text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">User baru mendaftar</p>
+                            <p class="text-xs text-gray-500">2 menit yang lalu</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">Transaksi berhasil</p>
+                            <p class="text-xs text-gray-500">5 menit yang lalu</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
+                        <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">Stok menipis</p>
+                            <p class="text-xs text-gray-500">10 menit yang lalu</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bell text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">Notifikasi terkirim</p>
+                            <p class="text-xs text-gray-500">15 menit yang lalu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions with Enhanced Design -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-800">Transaksi Terbaru</h3>
+                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Lihat Semua</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="table-row-hover hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    #1001
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">Ahmad Rahman</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                Rp 150,000
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 status-badge">
+                                    <span class="w-2 h-2 rounded-full mr-1.5 bg-green-400"></span>
+                                    Completed
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                5 menit yang lalu
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="table-row-hover hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    #1002
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">Siti Nurhaliza</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                Rp 275,000
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 status-badge">
+                                    <span class="w-2 h-2 rounded-full mr-1.5 bg-yellow-400"></span>
+                                    Pending
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                15 menit yang lalu
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">Tambah User</h4>
+                        <p class="text-blue-100 text-sm mb-4">Daftarkan user baru ke sistem</p>
+                        <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200" onclick="showActionFeedback('Tambah User')">
+                            Tambah User
+                        </button>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-plus text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">Buat Transaksi</h4>
+                        <p class="text-green-100 text-sm mb-4">Proses transaksi baru</p>
+                        <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200" onclick="showActionFeedback('Buat Transaksi')">
+                            Buat Transaksi
+                        </button>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-plus text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">Kirim Notifikasi</h4>
+                        <p class="text-purple-100 text-sm mb-4">Kirim notifikasi ke user</p>
+                        <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200" onclick="showActionFeedback('Kirim Notifikasi')">
+                            Kirim Notif
+                        </button>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-bell text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard Interactive Features
+        class DashboardManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.initializeAnimations();
+                this.initializeCharts();
+                this.initializeSearch();
+                this.initializeNotifications();
+                this.initializeQuickActions();
+                this.initializeRealTimeUpdates();
+            }
+
+            // Initialize page load animations
+            initializeAnimations() {
+                // Animate stats cards on load
+                const cards = document.querySelectorAll('.dashboard-card');
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 150);
+                });
+
+                // Animate chart bars
+                const chartBars = document.querySelectorAll('.chart-bar');
+                chartBars.forEach((bar, index) => {
+                    const originalHeight = bar.style.height;
+                    bar.style.height = '0%';
+                    setTimeout(() => {
+                        bar.style.transition = 'height 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
+                        bar.style.height = originalHeight;
+                    }, index * 100 + 500);
+                });
+            }
+
+            // Initialize interactive charts
+            initializeCharts() {
+                const chartContainer = document.querySelector('.h-64');
+                if (!chartContainer) return;
+            }
+
+            // Initialize search functionality
+            initializeSearch() {
+                const searchInput = document.querySelector('.search-input');
+                if (!searchInput) return;
+
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const tableRows = document.querySelectorAll('tbody tr');
+                    
+                    tableRows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                            row.style.opacity = '1';
+                        } else {
+                            row.style.opacity = '0.3';
+                        }
+                    });
+                });
+            }
+
+            // Initialize notification system
+            initializeNotifications() {
+                // Simulate real-time notifications
+                setInterval(() => {
+                    this.showNotification();
+                }, 30000); // Every 30 seconds
+            }
+
+            // Show notification toast
+            showNotification() {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50';
+                toast.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Transaksi baru berhasil diproses!</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                // Animate out and remove
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(full)';
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Initialize real-time updates
+            initializeRealTimeUpdates() {
+                // Update time every minute
+                setInterval(() => {
+                    this.updateTime();
+                }, 60000);
+                
+                // Simulate data updates
+                setInterval(() => {
+                    this.updateStats();
+                }, 30000);
+            }
+
+            // Update current time
+            updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            // Update stats with animation
+            updateStats() {
+                const statNumbers = document.querySelectorAll('.text-3xl.font-bold');
+                statNumbers.forEach(number => {
+                    const currentValue = parseInt(number.textContent.replace(/,/g, ''));
+                    const newValue = currentValue + Math.floor(Math.random() * 5);
+                    
+                    // Animate number change
+                    this.animateNumber(number, currentValue, newValue);
+                });
+            }
+
+            // Animate number changes
+            animateNumber(element, start, end) {
+                const duration = 1000;
+                const startTime = performance.now();
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const current = Math.floor(start + (end - start) * progress);
+                    element.textContent = current.toLocaleString();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            }
+        }
+
+        // Global functions for demo
+        function updateChartPeriod(button) {
+            const buttons = button.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-blue-100', 'text-blue-600');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            
+            button.classList.remove('bg-gray-100', 'text-gray-600');
+            button.classList.add('bg-blue-100', 'text-blue-600');
+            
+            // Simulate chart update
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach((bar, index) => {
+                const newHeight = Math.random() * 80 + 20;
+                bar.style.transition = 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                bar.style.height = `${newHeight}%`;
+            });
+        }
+
+        function showActionFeedback(action) {
+            const feedback = document.createElement('div');
+            feedback.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 z-50';
+            feedback.textContent = `${action} sedang diproses...`;
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.style.transform = 'translateY(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                feedback.style.transform = 'translateY(full)';
+                setTimeout(() => {
+                    document.body.removeChild(feedback);
+                }, 300);
+            }, 2000);
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new DashboardManager();
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K for search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.search-input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
